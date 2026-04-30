@@ -1,10 +1,9 @@
 node_modules/
 dist/
 
-# Credentials — never commit OAuth keys or tokens
-credentials/gcp-oauth.keys.json
-credentials/.gdrive-server-credentials.json
-credentials/.gdrive-setup.json
+# Credentials — never commit OAuth keys, tokens, or local backups
+credentials/*
+!credentials/.gitkeep
 
 # Environment
 .env
