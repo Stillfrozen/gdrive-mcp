@@ -1,3 +1,11 @@
+---
+title: "Google Drive MCP Server"
+tags:
+  - проект/workspace
+  - подпроект/tools
+  - тип/guide
+  - область/meta
+---
 # Google Drive MCP Server
 
 A [Model Context Protocol](https://modelcontextprotocol.io/) server that gives LLM-powered tools (Claude Code CLI, Cursor, Claude Desktop, etc.) access to Google Drive, Google Docs, and Google Sheets.
