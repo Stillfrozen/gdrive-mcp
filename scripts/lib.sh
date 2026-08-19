@@ -336,14 +336,18 @@ print_mcp_config() {
   step "Add to your MCP client"
 
   printf "\n  ${BOLD}Claude Code CLI:${RESET}\n"
-  printf '  claude mcp add --scope user wagnerlabs-gdrive -- node "%s"\n' "$abs_index"
+  printf '  claude mcp add --scope user gdrive -- node "%s"\n' "$abs_index"
 
-  printf "\n  ${BOLD}Cursor (.cursor/mcp.json):${RESET}\n"
+  printf "\n  ${BOLD}Cursor (~/.cursor/mcp.json):${RESET}\n"
   printf '  {\n'
   printf '    "mcpServers": {\n'
   printf '      "gdrive": {\n'
   printf '        "command": "node",\n'
-  printf '        "args": ["%s"]\n' "$abs_index"
+  printf '        "args": ["%s"],\n' "$abs_index"
+  printf '        "env": {\n'
+  printf '          "GDRIVE_OAUTH_PATH": "%s",\n' "$OAUTH_KEYFILE"
+  printf '          "GDRIVE_CREDENTIALS_PATH": "%s"\n' "$CREDENTIALS_FILE"
+  printf '        }\n'
   printf '      }\n'
   printf '    }\n'
   printf '  }\n'

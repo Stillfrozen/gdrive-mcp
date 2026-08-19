@@ -120,7 +120,17 @@ cloud_console_walkthrough() {
   open_url "$url"
   wait_for_enter
 
-  # e. Add required scopes
+  # e. Test users (External + Testing)
+  step "Step 3b: Add yourself as a test user (External apps)"
+  info "If Audience is External and Publishing status is Testing, add your Gmail as a Test user."
+  info "Google Auth Platform → Audience → Test users → Add users."
+  info "Skip this if Audience is Internal (Google Workspace)."
+  url=$(build_console_url "oauth_consent")
+  info "Link: $url"
+  open_url "$url"
+  wait_for_enter
+
+  # f. Add required scopes
   step "Step 4: Add required scopes"
   info "In the left sidebar, go to 'Data Access', then click 'Add or remove scopes'."
   info "Add these scopes:"
@@ -135,7 +145,7 @@ cloud_console_walkthrough() {
   info "Save when done."
   wait_for_enter
 
-  # f. Create OAuth Desktop client
+  # g. Create OAuth Desktop client
   step "Step 5: Create an OAuth Desktop client"
   info "1. Application type: Desktop app"
   info "2. Name: gdrive-mcp"

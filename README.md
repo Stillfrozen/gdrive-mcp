@@ -12,12 +12,16 @@ A [Model Context Protocol](https://modelcontextprotocol.io/) server that gives L
 
 Search, list, and read files, including automatic export of Google Docs as Markdown, Sheets as CSV, and Slides as plain text. Create and edit Google Docs with targeted text insertion, replacement, formatting, headings, lists, alignment, rename, and duplicate operations. Create and edit Google Sheets with value updates, formatting, tab management, and row or column operations. Works with both personal drives and shared drives.
 
+Based on [wagnerlabs/gdrive-mcp](https://github.com/wagnerlabs/gdrive-mcp). This copy is the team-maintained GitHub repo for Cursor.
+
+> **Русская пошаговая установка (Google Cloud + ключи + Cursor):** [docs/INSTALL.ru.md](docs/INSTALL.ru.md)
+
 ## Quick start
 
 ### 1. Guided setup (recommended)
 
 ```bash
-git clone https://github.com/wagnerlabs/gdrive-mcp.git
+git clone https://github.com/Stillfrozen/gdrive-mcp.git
 cd gdrive-mcp
 ./scripts/install.sh
 ```
@@ -33,31 +37,37 @@ The setup script installs dependencies, builds the project, and walks you throug
 #### Claude Code CLI
 
 ```bash
-claude mcp add --scope user wagnerlabs-gdrive -- node /absolute/path/to/gdrive-mcp/dist/index.js
+claude mcp add --scope user gdrive -- node /absolute/path/to/gdrive-mcp/dist/index.js
 ```
 
-The `--scope user` flag installs the server globally, so the MCP server will be available in Claude Code as **wagnerlabs-gdrive** from any directory you run Claude Code in.
+The `--scope user` flag installs the server globally, so the MCP server will be available in Claude Code as **gdrive** from any directory you run Claude Code in.
 
 To remove:
 
 ```bash
-claude mcp remove wagnerlabs-gdrive
+claude mcp remove gdrive
 ```
 
 #### Cursor
 
-Add to `.cursor/mcp.json` in any project (or globally):
+Add to `~/.cursor/mcp.json` (or `.cursor/mcp.json` in a project). Use an **absolute** path:
 
 ```json
 {
   "mcpServers": {
     "gdrive": {
       "command": "node",
-      "args": ["/absolute/path/to/gdrive-mcp/dist/index.js"]
+      "args": ["/absolute/path/to/gdrive-mcp/dist/index.js"],
+      "env": {
+        "GDRIVE_OAUTH_PATH": "/absolute/path/to/gdrive-mcp/credentials/gcp-oauth.keys.json",
+        "GDRIVE_CREDENTIALS_PATH": "/absolute/path/to/gdrive-mcp/credentials/.gdrive-server-credentials.json"
+      }
     }
   }
 }
 ```
+
+`env` is optional if the JSON files stay in `credentials/` next to the repo. Restart MCP in Cursor (**Settings → MCP → Reload**) after saving.
 
 #### Claude Desktop
 
