@@ -11,6 +11,8 @@ tags:
 
 # Установка Google Drive MCP в Cursor
 
+Это детальный разбор Google Cloud и `mcp.json`. Обзор инструментов, safety model и быстрый старт — в [README.md](../README.md).
+
 Пошаговая инструкция для **личного** использования: Cursor запускает сервер локально (stdio). Через MCP можно искать и читать файлы на Google Drive, а также создавать и править Google Docs и Google Sheets.
 
 **Репозиторий:** https://github.com/Stillfrozen/gdrive-mcp
@@ -350,6 +352,6 @@ API не включён в этом GCP-проекте, или OAuth-клиен�
 
 ## Связанные заметки
 
-- [[tools/gdrive-mcp/README]] — обзор инструментов и safety model
+- [[tools/gdrive-mcp/README]] — основной гайд: обзор, инструменты, safety model
 - [[tools/kaiten-cursor-connector/docs/INSTALL.ru]] — тот же формат установки для Kaiten MCP
 - [[docs/cursor-config-map-2026-07-23]] — карта MCP в Cursor

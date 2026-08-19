@@ -1,24 +1,32 @@
 ---
 title: "Google Drive MCP Server"
+date: 2026-08-19
 tags:
   - проект/workspace
   - подпроект/tools
   - тип/guide
-  - область/meta
+  - область/tech
+  - дата/2026-08-19
 ---
+
 # Google Drive MCP Server
 
-A [Model Context Protocol](https://modelcontextprotocol.io/) server that gives LLM-powered tools (Claude Code CLI, Cursor, Claude Desktop, etc.) access to Google Drive, Google Docs, and Google Sheets.
+Локальный [MCP](https://modelcontextprotocol.io/)-сервер для Cursor, Claude Code и Claude Desktop. Через него агент ищет и читает файлы на Google Drive, создаёт и правит Google Docs и Google Sheets.
 
-Search, list, and read files, including automatic export of Google Docs as Markdown, Sheets as CSV, and Slides as plain text. Create and edit Google Docs with targeted text insertion, replacement, formatting, headings, lists, alignment, rename, and duplicate operations. Create and edit Google Sheets with value updates, formatting, tab management, and row or column operations. Works with both personal drives and shared drives.
+Google Docs при чтении уходят в Markdown, таблицы — в CSV, презентации — в текст. Docs можно править точечно: вставка, замена, стили, заголовки, списки, переименование, дубликат. Sheets — значения, форматы, вкладки, строки и столбцы. Работает и с личным Диском, и с Shared drives.
 
-Based on [wagnerlabs/gdrive-mcp](https://github.com/wagnerlabs/gdrive-mcp). This copy is the team-maintained GitHub repo for Cursor.
+Репозиторий: https://github.com/Stillfrozen/gdrive-mcp  
+Основано на [wagnerlabs/gdrive-mcp](https://github.com/wagnerlabs/gdrive-mcp).
 
-> **Русская пошаговая установка (Google Cloud + ключи + Cursor):** [docs/INSTALL.ru.md](docs/INSTALL.ru.md)
+Ключи OAuth живут только у вас на диске. В git они не попадают.
 
-## Quick start
+**Пошаговая установка в Google Cloud (проект, API, Desktop OAuth, test users):** [docs/INSTALL.ru.md](docs/INSTALL.ru.md)
 
-### 1. Guided setup (recommended)
+---
+
+## Быстрый старт
+
+Нужны Node.js 18+ (лучше 20) и Google-аккаунт, с чьего Диска будете работать.
 
 ```bash
 git clone https://github.com/Stillfrozen/gdrive-mcp.git
@@ -26,31 +34,19 @@ cd gdrive-mcp
 ./scripts/install.sh
 ```
 
-The setup script installs dependencies, builds the project, and walks you through creating a Google Cloud project, enabling APIs, configuring OAuth, and authenticating. It prints ready-to-copy MCP client config at the end. Run with `--dry-run` to preview without side effects:
+Скрипт ставит зависимости, собирает проект и проводит по Google Cloud: проект, API, экран согласия, Desktop-клиент, логин в браузере. В конце печатает готовый фрагмент для MCP-клиента.
+
+Посмотреть шаги без изменений:
 
 ```bash
 ./scripts/install.sh --dry-run
 ```
 
-### 2. Add to your MCP client
+Если хотите сами кликать в Console — весь разбор экранов в [docs/INSTALL.ru.md](docs/INSTALL.ru.md).
 
-#### Claude Code CLI
+### Cursor
 
-```bash
-claude mcp add --scope user gdrive -- node /absolute/path/to/gdrive-mcp/dist/index.js
-```
-
-The `--scope user` flag installs the server globally, so the MCP server will be available in Claude Code as **gdrive** from any directory you run Claude Code in.
-
-To remove:
-
-```bash
-claude mcp remove gdrive
-```
-
-#### Cursor
-
-Add to `~/.cursor/mcp.json` (or `.cursor/mcp.json` in a project). Use an **absolute** path:
+В `~/.cursor/mcp.json` (или `.cursor/mcp.json` в проекте) — только **абсолютный** путь:
 
 ```json
 {
@@ -67,11 +63,21 @@ Add to `~/.cursor/mcp.json` (or `.cursor/mcp.json` in a project). Use an **absol
 }
 ```
 
-`env` is optional if the JSON files stay in `credentials/` next to the repo. Restart MCP in Cursor (**Settings → MCP → Reload**) after saving.
+Блок `env` не обязателен, если JSON лежат в `credentials/` репозитория. Если в файле уже есть другие серверы — добавьте `"gdrive"` внутрь `mcpServers`, не затирая остальное.
 
-#### Claude Desktop
+Дальше **Cursor → Settings → MCP → Reload**. Индикатор `gdrive` должен стать зелёным.
 
-Add to `claude_desktop_config.json`:
+### Claude Code CLI
+
+```bash
+claude mcp add --scope user gdrive -- node /absolute/path/to/gdrive-mcp/dist/index.js
+```
+
+`--scope user` ставит сервер глобально. Снять: `claude mcp remove gdrive`.
+
+### Claude Desktop
+
+В `claude_desktop_config.json`:
 
 ```json
 {
@@ -84,149 +90,155 @@ Add to `claude_desktop_config.json`:
 }
 ```
 
-## Tools
+---
 
-### Read-only tools
+## Инструменты
 
-| Tool | Description |
-|------|-------------|
-| `gdrive_search` | Search files using full-text search or Drive query syntax |
-| `gdrive_get_file` | Get detailed metadata for a file by ID |
-| `gdrive_read_file` | Read file content (Docs → Markdown, Sheets → CSV, Slides → plain text) |
-| `gdrive_list_files` | List files in a folder with sorting and pagination |
-| `gdrive_get_spreadsheet_info` | Get spreadsheet metadata including all sheet tabs and named ranges |
-| `gdrive_get_document_info` | Get Google Docs metadata and optional tab-scoped structured content |
+### Чтение
 
-### Write tools
+| Tool | Что делает |
+|------|------------|
+| `gdrive_search` | Поиск по полному тексту или синтаксису запросов Drive |
+| `gdrive_get_file` | Метаданные файла по ID |
+| `gdrive_read_file` | Содержимое: Docs → Markdown, Sheets → CSV, Slides → текст |
+| `gdrive_list_files` | Список файлов в папке, сортировка и пагинация |
+| `gdrive_get_spreadsheet_info` | Вкладки таблицы и именованные диапазоны |
+| `gdrive_get_document_info` | Метаданные Doc и опционально структурированный текст вкладки |
 
-#### Sheets
+### Запись: Sheets
 
-| Tool | Description | Destructive | Idempotent |
-|------|-------------|:-----------:|:----------:|
-| `gdrive_create_sheet` | Create a new spreadsheet | No | No |
-| `gdrive_update_sheet` | Overwrite values in a cell range | Yes | Yes |
-| `gdrive_append_sheet` | Append rows after existing data | No | No |
-| `gdrive_clear_values` | Clear values from a cell range (preserves formatting) | Yes | Yes |
-| `gdrive_format_cells` | Apply formatting to a cell range | No | Yes |
-| `gdrive_add_sheet_tab` | Add a new sheet tab | No | No |
-| `gdrive_delete_sheet_tab` | Delete a sheet tab and all its data | Yes | No |
-| `gdrive_rename_sheet_tab` | Rename an existing sheet tab | Yes | No |
-| `gdrive_insert_rows_columns` | Insert empty rows or columns | No | No |
-| `gdrive_delete_rows_columns` | Delete rows or columns and their data | Yes | No |
+| Tool | Что делает | Destructive | Idempotent |
+|------|------------|:-----------:|:----------:|
+| `gdrive_create_sheet` | Новая таблица | Нет | Нет |
+| `gdrive_update_sheet` | Перезаписать диапазон ячеек | Да | Да |
+| `gdrive_append_sheet` | Добавить строки после данных | Нет | Нет |
+| `gdrive_clear_values` | Очистить значения, формат оставить | Да | Да |
+| `gdrive_format_cells` | Формат диапазона | Нет | Да |
+| `gdrive_add_sheet_tab` | Новая вкладка | Нет | Нет |
+| `gdrive_delete_sheet_tab` | Удалить вкладку вместе с данными | Да | Нет |
+| `gdrive_rename_sheet_tab` | Переименовать вкладку | Да | Нет |
+| `gdrive_insert_rows_columns` | Вставить пустые строки или столбцы | Нет | Нет |
+| `gdrive_delete_rows_columns` | Удалить строки или столбцы с данными | Да | Нет |
 
-#### Docs
+### Запись: Docs
 
-| Tool | Description | Destructive | Idempotent |
-|------|-------------|:-----------:|:----------:|
-| `gdrive_create_doc` | Create a blank Google Doc, optionally in a specific folder | No | No |
-| `gdrive_insert_doc_text` | Insert text at a position, explicit index, or text anchor | No | No |
-| `gdrive_replace_doc_text` | Replace a targeted text range or anchored text match | Yes | No |
-| `gdrive_replace_all_doc_text` | Replace every exact text match in a tab or across all tabs | Yes | Yes |
-| `gdrive_delete_doc_text` | Delete a targeted text range or anchored text match | Yes | No |
-| `gdrive_update_doc_text_style` | Apply character-level formatting such as bold, colors, fonts, and links | No | Yes |
-| `gdrive_update_doc_paragraph_style` | Apply headings and alignment to whole paragraphs | No | Yes |
-| `gdrive_update_doc_list` | Create, change, or remove list formatting on paragraphs | Yes | Yes |
-| `gdrive_rename_doc` | Rename an existing Google Doc file | Yes | No |
-| `gdrive_duplicate_doc` | Duplicate a Google Doc, optionally into a specific folder | No | No |
+| Tool | Что делает | Destructive | Idempotent |
+|------|------------|:-----------:|:----------:|
+| `gdrive_create_doc` | Пустой Doc, можно в указанную папку | Нет | Нет |
+| `gdrive_insert_doc_text` | Вставка по позиции, индексу или текстовому якорю | Нет | Нет |
+| `gdrive_replace_doc_text` | Замена диапазона или якорного совпадения | Да | Нет |
+| `gdrive_replace_all_doc_text` | Замена всех точных совпадений на вкладке или во всём Doc | Да | Да |
+| `gdrive_delete_doc_text` | Удаление диапазона или якорного совпадения | Да | Нет |
+| `gdrive_update_doc_text_style` | Жирный, цвет, шрифт, ссылка | Нет | Да |
+| `gdrive_update_doc_paragraph_style` | Заголовки и выравнивание абзацев | Нет | Да |
+| `gdrive_update_doc_list` | Списки: создать, сменить, снять | Да | Да |
+| `gdrive_rename_doc` | Переименовать файл Doc | Да | Нет |
+| `gdrive_duplicate_doc` | Дубликат, можно в указанную папку | Нет | Нет |
 
-### Value input options
+### Как пишутся значения в ячейки
 
-When writing cell values (`gdrive_update_sheet`, `gdrive_append_sheet`), the `value_input_option` parameter controls how values are interpreted:
+У `gdrive_update_sheet` и `gdrive_append_sheet` параметр `value_input_option`:
 
-- **`USER_ENTERED`** (default) — Values are parsed as if typed into the Google Sheets UI. Formulas are executed (`=SUM(A1:A10)`), numbers and dates are formatted automatically.
-- **`RAW`** — Values are stored exactly as provided. A string like `=SUM(A1:A10)` is stored as literal text, not executed as a formula.
+- **`USER_ENTERED`** (по умолчанию) — как ввод в UI Sheets. Формула `=SUM(A1:A10)` выполнится, числа и даты отформатируются.
+- **`RAW`** — как есть. Строка `=SUM(A1:A10)` останется текстом.
 
-### File format handling
+### Как читаются файлы
 
-When reading files with `gdrive_read_file`, Google Workspace documents are automatically exported:
+`gdrive_read_file` сам экспортирует документы Workspace:
 
-| Source format | Exported as |
-|---------------|-------------|
+| Формат источника | Что вернётся |
+|------------------|--------------|
 | Google Docs | Markdown |
-| Google Sheets | CSV (first sheet only) |
-| Google Slides | Plain text |
-| Google Drawings | PNG (metadata only) |
-| Text files (`.txt`, `.json`, `.js`, etc.) | Read directly as UTF-8 |
-| Binary files (images, PDFs, etc.) | Returns metadata with browser link |
+| Google Sheets | CSV (только первая вкладка) |
+| Google Slides | Текст |
+| Google Drawings | PNG, по сути метаданные |
+| Текст (`.txt`, `.json`, `.js`, …) | UTF-8 как есть |
+| Бинарники (картинки, PDF, …) | Метаданные и ссылка в браузер |
 
-For full spreadsheet access (all tabs, structured data, editing), use `gdrive_get_spreadsheet_info` and the Sheets write tools instead of `gdrive_read_file`.
+Всю таблицу (вкладки, структура, запись) берите через `gdrive_get_spreadsheet_info` и write-tools Sheets, не через `gdrive_read_file`.
 
-For structured Google Docs reads, paragraph-aware formatting, headings, lists, alignment, and anchor-based edits, use `gdrive_get_document_info` plus the Docs write tools. Structured paragraph responses include both raw `text` and `displayText` without the trailing paragraph newline, which is usually the safer anchor to round-trip back into Docs write tools. `gdrive_read_file` still remains the fastest way to read a Doc as Markdown.
+Для абзацев, заголовков, списков и якорных правок Doc — `gdrive_get_document_info`. В ответе есть сырой `text` и `displayText` без хвостового перевода строки абзаца; `displayText` обычно безопаснее как якорь. Markdown быстрее всего даёт `gdrive_read_file`.
 
-## Safety model
+---
 
-The server applies several layers of protection for both Docs and Sheets, with Docs adding revision-aware write controls and anchor validation on top of the existing Sheets safeguards.
+## Модель безопасности
 
-### 1. Per-tool MCP annotations
+Несколько слоёв: аннотации MCP, «сначала прочитай», для Docs ещё ревизия и якоря, для Sheets — сверка текущих значений.
 
-Each tool declares its safety characteristics via [MCP tool annotations](https://modelcontextprotocol.io/specification/2025-03-26/server/tools#annotations), so MCP clients can prompt the user appropriately before executing destructive operations. See the annotations in the tools tables above.
+### 1. Аннотации инструментов
 
-### 2. Read-before-write guard
+Каждый tool объявляет [MCP annotations](https://modelcontextprotocol.io/specification/2025-03-26/server/tools#annotations). Клиент может спросить подтверждение перед разрушающей операцией. См. колонки Destructive / Idempotent в таблицах выше.
 
-The server tracks which spreadsheets and Docs the agent has actually looked at during the current session.
+### 2. Сначала чтение, потом запись
 
-A spreadsheet is marked as "read" when the agent uses:
+Сервер помнит, какие таблицы и Docs агент уже открывал **в этой сессии**.
 
-- `gdrive_read_file` (shows cell data as CSV)
-- `gdrive_get_spreadsheet_info` (shows sheet structure and tabs)
-- `gdrive_create_sheet` (the agent just created it, so it knows what's there)
+Таблица считается прочитанной после:
 
-A Google Doc is marked as "read" when the agent uses:
+- `gdrive_read_file` (ячейки как CSV)
+- `gdrive_get_spreadsheet_info` (структура и вкладки)
+- `gdrive_create_sheet` (агент сам только что создал файл)
 
-- `gdrive_read_file` (reads the Doc as Markdown and caches the current Docs revision when available)
-- `gdrive_get_document_info` (reads tab metadata or structured paragraph content)
-- `gdrive_create_doc` (the agent just created it)
+Doc считается прочитанным после:
 
-Every write tool checks this session state before executing. If the agent hasn't read the target resource, the call is rejected:
+- `gdrive_read_file` (Markdown + ревизия, если Google её отдал)
+- `gdrive_get_document_info` (вкладки или структурированный текст)
+- `gdrive_create_doc`
 
-> *"You must read this spreadsheet before writing to it. Use gdrive_read_file or gdrive_get_spreadsheet_info first."*
+Любая запись без этого шага отклоняется:
 
-> *"You must read this document before writing to it. Use gdrive_read_file or gdrive_get_document_info first."*
+> *You must read this spreadsheet before writing to it…*
 
-This prevents the agent from accidentally targeting the wrong file. The set resets when the server process restarts (every MCP session).
+> *You must read this document before writing to it…*
 
-`gdrive_get_file` is deliberately excluded because it only returns Drive metadata, not sheet structure or document content.
+Так агент реже целится не в тот файл. Список сбрасывается при рестарте процесса (каждая MCP-сессия заново).
 
-### 3. Docs revision-aware writes
+`gdrive_get_file` сюда не входит: это только метаданные Диска, не содержимое.
 
-Docs edits are tied to the revision the agent most recently read:
+### 3. Запись в Docs с учётом ревизии
 
-- `conflict_mode: "strict"` is the default and uses Docs `requiredRevisionId`, so the edit fails if the document changed since it was read
-- `conflict_mode: "merge"` uses Docs `targetRevisionId`, which lets Google merge the edit with collaborator changes when possible
+Правка привязана к ревизии, которую агент читал последней:
 
-The server also maintains a small session-scoped structured-content cache from `gdrive_get_document_info include_content=true`. Anchor-based tools such as `gdrive_insert_doc_text`, `gdrive_replace_doc_text`, `gdrive_update_doc_paragraph_style`, and `gdrive_update_doc_list` reuse that cache when the document revision still matches; otherwise the server fetches a fresh structured snapshot before resolving anchors.
+- `conflict_mode: "strict"` (по умолчанию) — Docs `requiredRevisionId`. Если документ успели поменять, запись падает.
+- `conflict_mode: "merge"` — Docs `targetRevisionId`. Google по возможности смержит с чужими правками.
 
-For targeted Docs text edits, you can also pass `expected_text` as an optimistic safety check. This verifies the exact text in the resolved range before the write is sent.
+Кэш структурированного содержимого живёт в сессии после `gdrive_get_document_info include_content=true`. Якорные tools (`gdrive_insert_doc_text`, `gdrive_replace_doc_text`, `gdrive_update_doc_paragraph_style`, `gdrive_update_doc_list`) берут его, пока ревизия та же. Иначе сервер заново снимает снимок.
 
-For anchor-based `gdrive_delete_doc_text` and `gdrive_replace_doc_text`, the server automatically trims only the final paragraph newline when a match reaches the end of the current tab, because the Docs API rejects delete ranges that include the segment-terminal newline. Explicit `start_index` / `end_index` edits stay strict and must exclude that trailing newline themselves.
+Для точечной замены текста можно передать `expected_text`: перед отправкой сервер сверит, что в диапазоне именно эта строка.
 
-### 4. Sheets precondition check
+У якорных `gdrive_delete_doc_text` и `gdrive_replace_doc_text` сервер сам отрезает только финальный перевод строки абзаца, если совпадение упирается в конец вкладки. Docs API не удаляет диапазон с терминальным newline сегмента. Явные `start_index` / `end_index` этого не делают: хвостовой newline надо исключить самим.
 
-`gdrive_update_sheet` accepts an optional `expected_current_values` parameter — a 2D array the same shape as `values`. When provided, the server reads the current cell contents and compares them before writing. If they don't match, the write is refused with an error showing what the cells actually contain.
+### 4. Предусловие для Sheets
 
-- **For small, targeted edits** (changing one cell, fixing a formula): include `expected_current_values` as a safety net.
-- **For bulk operations** (reformatting dates across 1,000 rows): skip it to avoid doubling API calls and hitting rate limits.
+У `gdrive_update_sheet` есть опциональный `expected_current_values` — двумерный массив той же формы, что `values`. Сервер читает ячейки и сравнивает. Не совпало — запись отказ, в ошибке фактическое содержимое.
 
-Set `include_previous_values: true` to include the old values in the response for auditing. When `expected_current_values` is provided, previous values are always included automatically.
+- Точечная правка (одна ячейка, формула) — передавайте `expected_current_values`.
+- Массовая операция (тысяча строк) — не передавайте, иначе удвоите запросы и упрётесь в квоту.
 
-### Recovery
+`include_previous_values: true` вернёт старые значения для аудита. Если задан `expected_current_values`, старые значения приходят всегда.
 
-Edits made via the Docs and Sheets APIs appear in Google Workspace version history, so users can revert changes if something goes wrong.
+### Откат
 
-**No tool can delete an entire Google Doc or spreadsheet file from Google Drive.** Destructive operations are limited to structured edits inside a Doc and sheet-level operations inside a spreadsheet. Whole-file deletion still requires the Google Drive UI.
+Правки Docs и Sheets видны в истории версий Google Workspace. Откатить можно там.
 
-## Configuration
+**Ни один tool не удаляет файл целиком с Диска.** Разрушающие операции — только внутри Doc и внутри таблицы. Удалить файл — только через UI Диска.
 
-Credential paths can be customized via environment variables:
+---
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `GDRIVE_OAUTH_PATH` | `credentials/gcp-oauth.keys.json` | Path to OAuth client secret |
-| `GDRIVE_CREDENTIALS_PATH` | `credentials/.gdrive-server-credentials.json` | Path to saved token |
+## Конфигурация
 
-## Upgrading
+Пути к ключам можно переопределить переменными окружения:
 
-After pulling new changes, run the upgrade script. It rebuilds the project and walks you through any new setup steps (new APIs, scope changes, re-authentication) based on [`setup-manifest.json`](setup-manifest.json):
+| Переменная | По умолчанию | Что это |
+|------------|--------------|---------|
+| `GDRIVE_OAUTH_PATH` | `credentials/gcp-oauth.keys.json` | JSON OAuth-клиента из Google Cloud |
+| `GDRIVE_CREDENTIALS_PATH` | `credentials/.gdrive-server-credentials.json` | Сохранённый refresh token |
+
+---
+
+## Обновление
+
+После `git pull` запускайте upgrade. Он пересоберёт проект и, если в [`setup-manifest.json`](setup-manifest.json) появились API или scope, попросит заново пройти auth:
 
 ```bash
 cd /path/to/gdrive-mcp
@@ -234,42 +246,39 @@ git pull
 ./scripts/upgrade.sh
 ```
 
-If no setup changes are needed, `./scripts/upgrade.sh` just rebuilds and confirms you're up to date. The MCP server picks up changes on next launch — no need to re-register it.
+Если манифест не менялся, скрипт только пересоберёт и скажет, что вы на месте. Cursor подхватит `dist/` после Reload MCP. Перерегистрировать сервер не нужно.
 
-> **Scope tradeoff:** This server requests full `drive` rather than `drive.file`. That is broader than Google's narrowest best practice, but it is required to preserve the current "read any accessible Drive file" behavior and to support rename, duplicate, and write operations on arbitrary existing Docs. The `documents` scope is required for structured Docs reads and Docs `batchUpdate` writes.
+> **Про scope:** сервер просит полный `drive`, а не узкий `drive.file`. Это шире, чем минимальная рекомендация Google, но иначе нельзя читать произвольный доступный файл и писать в уже существующие Docs (rename, duplicate, правки). Scope `documents` нужен для структурированного чтения и `batchUpdate`.
 
-## Notes
+У External-приложения в статусе Testing refresh token живёт **7 дней**. Потом `invalid_grant` и снова `npm run auth`. Подробности и варианты (Internal / Publish) — в [docs/INSTALL.ru.md](docs/INSTALL.ru.md).
 
-- Spreadsheet creation (`gdrive_create_sheet`) places the new spreadsheet in the user's root Drive folder. Creating in a specific folder is not supported.
-- `gdrive_read_file` exports spreadsheets as CSV from the first sheet only. Use `gdrive_get_spreadsheet_info` to discover all tabs.
-- `gdrive_read_file` continues to export Google Docs as Markdown. Use `gdrive_get_document_info` when you need tab metadata, paragraph boundaries, headings, list state, or anchor-friendly ranges.
-- For Docs formatting and paragraph structure changes, prefer reading with `gdrive_get_document_info include_content=true` first so the agent has exact paragraph boundaries and revision-aware anchor data.
-- `gdrive_replace_all_doc_text` defaults to the first tab for safety. To replace across every tab, you must set `all_tabs: true` explicitly.
+---
 
-## Development
+## Ограничения
+
+- `gdrive_create_sheet` кладёт таблицу в корень Диска. Папку выбрать нельзя.
+- `gdrive_read_file` для Sheets отдаёт CSV только с первой вкладки. Остальные вкладки — через `gdrive_get_spreadsheet_info`.
+- `gdrive_read_file` для Docs всегда Markdown. Вкладки, границы абзацев, списки, якоря — `gdrive_get_document_info`.
+- Перед сменой формата и структуры Doc сначала читайте `gdrive_get_document_info include_content=true`.
+- `gdrive_replace_all_doc_text` по умолчанию трогает первую вкладку. По всем вкладкам — только с явным `all_tabs: true`.
+
+---
+
+## Разработка
 
 ```bash
-# Install dependencies
 npm install
-
-# Run in dev mode (uses tsx, no build step)
-npm run dev
-
-# Build
+npm run dev          # tsx, без сборки
 npm run build
-
-# Run tests
 npm test
-
-# Run the live Google Docs smoke test (requires saved credentials)
-npm run test:live
-
-# Run tests in watch mode
+npm run test:live    # живой Google Doc, нужны сохранённые credentials
 npm run test:watch
 ```
 
-`npm run test:live` creates a temporary Google Doc, inserts text through the MCP server flow, verifies the content via `gdrive_get_document_info`, and then trashes the temporary file during cleanup.
+`npm run test:live` создаёт временный Doc, вставляет текст через тот же поток, что MCP, проверяет через `gdrive_get_document_info` и в конце кладёт файл в корзину.
 
-## License
+---
+
+## Лицензия
 
 MIT
