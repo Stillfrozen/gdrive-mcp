@@ -20,6 +20,8 @@ Google Docs при чтении уходят в Markdown, таблицы — в 
 
 Ключи OAuth живут только у вас на диске. В git они не попадают.
 
+**Доступ:** приложение просит полный scope `drive` (не `drive.file`). Токен видит **весь** Google Диск этого аккаунта и может менять Docs/Sheets. Для команды лучше отдельный Google-аккаунт или Диск только с нужными папками — не админский корпоративный логин.
+
 **Пошаговая установка в Google Cloud (проект, API, Desktop OAuth, test users):** [docs/INSTALL.ru.md](docs/INSTALL.ru.md)
 
 Skill для агента: [skills/gdrive/SKILL.md](skills/gdrive/SKILL.md) → копируется в `~/.cursor/skills/gdrive/`.
