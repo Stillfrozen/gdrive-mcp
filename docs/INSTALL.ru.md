@@ -265,6 +265,19 @@ claude mcp add --scope user gdrive -- node /absolute/path/to/gdrive-mcp/dist/ind
 
 ---
 
+## 5.1. Skill для агента (рекомендуется)
+
+Чтобы Cursor стабильнее выбирал инструменты Drive / Docs / Sheets:
+
+```bash
+mkdir -p ~/.cursor/skills/gdrive
+cp skills/gdrive/SKILL.md ~/.cursor/skills/gdrive/SKILL.md
+```
+
+После `git pull` обновляйте skill той же командой. Это общий skill «как ходить в Диск». Списки ваших конкретных таблиц и документов в этот репозиторий не кладут.
+
+---
+
 ## 6. Обновление
 
 ```bash

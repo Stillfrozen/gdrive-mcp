@@ -22,6 +22,8 @@ Google Docs при чтении уходят в Markdown, таблицы — в 
 
 **Пошаговая установка в Google Cloud (проект, API, Desktop OAuth, test users):** [docs/INSTALL.ru.md](docs/INSTALL.ru.md)
 
+Skill для агента: [skills/gdrive/SKILL.md](skills/gdrive/SKILL.md) → копируется в `~/.cursor/skills/gdrive/`.
+
 ---
 
 ## Быстрый старт
